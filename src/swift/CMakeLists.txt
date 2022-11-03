@@ -30,7 +30,7 @@ add_library(swiftDispatch
   Wrapper.swift)
 target_compile_options(swiftDispatch PRIVATE
   "SHELL:-Xcc -fblocks"
-  "SHELL:-Xcc -fmodule-map-file=${PROJECT_SOURCE_DIR}/dispatch/module.modulemap"
+  "SHELL:-Xcc -fmodule-map-file=${PROJECT_BINARY_DIR}/dispatch/module.modulemap"
   "SHELL:-Xcc -I${PROJECT_SOURCE_DIR}"
   "SHELL:-Xcc -I${PROJECT_SOURCE_DIR}/src/swift/shims")
 set_target_properties(swiftDispatch PROPERTIES

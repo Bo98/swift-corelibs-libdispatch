@@ -262,25 +262,42 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
   add_custom_command(OUTPUT
-                       "${PROJECT_SOURCE_DIR}/dispatch/module.modulemap"
-                       "${PROJECT_SOURCE_DIR}/private/module.modulemap"
+                       "${PROJECT_BINARY_DIR}/dispatch/module.modulemap"
+                       "${PROJECT_BINARY_DIR}/private/module.modulemap"
+                     DEPENDS
+                       "${PROJECT_SOURCE_DIR}/dispatch/darwin/module.modulemap"
+                       "${PROJECT_SOURCE_DIR}/private/darwin/module.modulemap"
                      COMMAND
-                       ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/dispatch/darwin/module.modulemap" "${PROJECT_SOURCE_DIR}/dispatch/module.modulemap"
+                       ${CMAKE_COMMAND} -E create_symlink "${PROJECT_SOURCE_DIR}/dispatch/darwin/module.modulemap" "${PROJECT_BINARY_DIR}/dispatch/module.modulemap"
                      COMMAND
-                       ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/private/darwin/module.modulemap" "${PROJECT_SOURCE_DIR}/private/module.modulemap")
+                       ${CMAKE_COMMAND} -E create_symlink "${PROJECT_SOURCE_DIR}/private/darwin/module.modulemap" "${PROJECT_BINARY_DIR}/private/module.modulemap")
 else()
   add_custom_command(OUTPUT
-                       "${PROJECT_SOURCE_DIR}/dispatch/module.modulemap"
-                       "${PROJECT_SOURCE_DIR}/private/module.modulemap"
+                       "${PROJECT_BINARY_DIR}/dispatch/module.modulemap"
+                       "${PROJECT_BINARY_DIR}/private/module.modulemap"
+                     DEPENDS
+                       "${PROJECT_SOURCE_DIR}/dispatch/generic/module.modulemap"
+                       "${PROJECT_SOURCE_DIR}/private/generic/module.modulemap"
                      COMMAND
-                       ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/dispatch/generic/module.modulemap" "${PROJECT_SOURCE_DIR}/dispatch/module.modulemap"
+                       ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/dispatch/generic/module.modulemap" "${PROJECT_BINARY_DIR}/dispatch/module.modulemap"
                      COMMAND
-                       ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/private/generic/module.modulemap" "${PROJECT_SOURCE_DIR}/private/module.modulemap")
+                       ${CMAKE_COMMAND} -E copy_if_different "${PROJECT_SOURCE_DIR}/private/generic/module.modulemap" "${PROJECT_BINARY_DIR}/private/module.modulemap")
 endif()
-add_custom_target(module-maps ALL
-                  DEPENDS
-                     "${PROJECT_SOURCE_DIR}/dispatch/module.modulemap"
-                     "${PROJECT_SOURCE_DIR}/private/module.modulemap")
+file(GLOB dispatch_headers RELATIVE "${PROJECT_SOURCE_DIR}" "dispatch/*.h")
+file(GLOB private_headers RELATIVE "${PROJECT_SOURCE_DIR}" "private/*.h")
+set(module_maps_dependencies
+      "${PROJECT_BINARY_DIR}/dispatch/module.modulemap"
+      "${PROJECT_BINARY_DIR}/private/module.modulemap")
+foreach(f IN LISTS dispatch_headers private_headers)
+  add_custom_command(OUTPUT
+                       "${PROJECT_BINARY_DIR}/${f}"
+                     COMMAND
+                       ${CMAKE_COMMAND} -E create_symlink "${PROJECT_SOURCE_DIR}/${f}" "${PROJECT_BINARY_DIR}/${f}"
+                     DEPENDS "${PROJECT_SOURCE_DIR}/${f}")
+  list(APPEND module_maps_dependencies "${PROJECT_BINARY_DIR}/${f}")
+endforeach()
+
+add_custom_target(module-maps ALL DEPENDS ${module_maps_dependencies})
 
 configure_file("${PROJECT_SOURCE_DIR}/cmake/config.h.in"
                "${PROJECT_BINARY_DIR}/config/config_ac.h")

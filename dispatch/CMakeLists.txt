@@ -16,7 +16,7 @@ install(FILES
         DESTINATION
           "${INSTALL_DISPATCH_HEADERS_DIR}")
 if(ENABLE_SWIFT)
-  set(base_dir "${CMAKE_CURRENT_SOURCE_DIR}")
+  set(base_dir "${CMAKE_CURRENT_BINARY_DIR}")
   if(NOT BUILD_SHARED_LIBS)
     set(base_dir "${CMAKE_CURRENT_SOURCE_DIR}/generic_static")
   endif()
